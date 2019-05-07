@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN" 
+					"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.login.mapper.LoginMapper">
+	<!-- 登录 -->
+	<select id="getStudentUser" parameterType="com.login.pojo.User" resultType="com.login.pojo.StudentUser">
+	select * from student where user =#{user} and pass = #{pass}
+	</select>
+	
+	<!-- 验证改密 -->
+	<select id="getStudentMessage" parameterType="com.login.pojo.User" resultType="com.login.pojo.StudentUser">
+	select * from student where user =#{user}
+	</select>
+	<!-- 更改密码 -->
+	<update id="updateStudentMessage" parameterType="com.login.pojo.User" >
+	UPDATE student SET pass =#{pass} where user =#{user}
+	</update>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</mapper>

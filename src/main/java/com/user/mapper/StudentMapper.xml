@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN" 
+					"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.user.mapper.StudentMapper">
+	<resultMap  id="testMap" type="com.topic.pojo.StudentTest">
+		<!-- column对应的是数据库中的字段名，property对应的是bean里的 -->
+		<id column="" property=""/>
+		<result column="one" property="t1"/>
+		<result column="two" property="t2"/>
+		<result column="three" property="t3"/>
+		<result column="four" property="t4"/>
+		<result column="five" property="t5"/>
+		<result column="six" property="t6"/>
+		<result column="seven" property="t7"/>
+		<result column="eight" property="t8"/>
+		<result column="nine" property="t9"/>
+		<result column="ten" property="t10"/>
+		<result column="eleven" property="t11"/>
+		<result column="twelve" property="t12"/>
+		<result column="thirteen" property="t13"/>
+		<result column="fourteen" property="t14"/>
+		<result column="fifteen" property="t15"/>
+		<result column="sixteen" property="t16"/>
+	</resultMap>
+
+
+	<!-- 即将考试 -->
+	<select id="countComingTotal" parameterType="String"  resultType="int">
+		select count(*) from arrange where user=#{user} and startdate &gt; now() and  state="0" 
+	</select>
+	<select id="listComingExamArrange"  resultType="com.user.pojo.ExamArrange">
+		select * from arrange where user=#{page.user} and startdate &gt; now() and  state="0" limit #{page.begin},#{page.end}
+	</select>
+	<!-- 正在考试 -->
+	<select id="countUnderwayTotal" parameterType="String"  resultType="int">
+		select count(*) from arrange where user=#{user} and startdate &lt;= now() and deadline &gt;= now() and  state="0" 
+	
+	</select>
+	<select id="listUnderwayExamArrange"  resultType="com.user.pojo.ExamArrange">
+		select * from arrange where user=#{page.user} and startdate &lt;= now() and deadline &gt;= now() and  state="0" limit #{page.begin},#{page.end}
+	</select>
+	<!-- 判断是否是第一次考试 -->
+	<select id="countExamQuestion"  resultType="int">
+		SELECT count(*) FROM answer_topic where user=#{user} and subject=#{subject} 
+	</select>
+	<!-- 删除试卷删除答案卷 -->
+	<delete id="deleteExamQuestion">
+		delete from answer_topic where user=#{user} and subject=#{subject} 
+	</delete>
+	<delete id="deleteExamAnswer">
+		delete from answer_analysis where user=#{user} and subject=#{subject} 
+	</delete>
+	
+	<!-- 第一次获取试卷 -->
+	<select id="listChoiceQuestion"  resultType="com.topic.pojo.ChoiceQuestion">
+		SELECT * FROM sub_select where subject=#{subject} ORDER BY  RAND() LIMIT 10
+	</select>
+	<select id="listShortAnswerQuestion"  resultType="com.topic.pojo.ShortAnswerQuestion">
+		SELECT * FROM sub_shortanswer where subject=#{subject} ORDER BY  RAND() LIMIT 6
+	</select>
+	<!-- 把完整的试卷放到学生个人的试卷库中 -->
+	<insert id="insertQuestions" >
+		insert into answer_topic values ( #{examQuestion.user},#{examQuestion.subject},7200,
+		<foreach collection="examQuestion.choiceQuestion" item="item" separator="," close=",">
+		#{item.topicOne}
+		</foreach>
+		<foreach collection="examQuestion.shortAnswerQuestion" item="item" separator="," close=")">
+		#{item.topicTwo}
+		</foreach>
+	</insert>
+	<!-- 分别根据主键来获取试卷的标准答案 -->
+	<select id="listChoiceModelAnswer" parameterType="java.util.List" resultType="com.topic.pojo.ModelAnswer">
+			select answer from select_answer where id in (
+			<foreach collection="choic" separator=","  item="item" close=")">  
+            #{item.id}  
+        	</foreach>
+	</select>
+	<select id="listShortModelAnswer" parameterType="java.util.List" resultType="com.topic.pojo.ModelAnswer">
+		select answer from short_answer where id in(
+		<foreach collection="shortAnswer" separator="," item="item" close=")">  
+            #{item.id}  
+        </foreach>
+	
+	</select>
+	<insert id="insertModelAnswers">
+		insert into random_test values ( #{modelAnswerList.user},#{modelAnswerList.subject},
+		<foreach collection="modelAnswerList.list" item="item" separator="," close=")">
+		#{item.answer}
+		</foreach>
+	</insert>
+	
+	<!-- 提交试卷后再修改考试状态 -->
+	<update id="updateState">
+		update arrange set state ="1" where user=#{user} and subjects=#{subject}
+	
+	</update>
+	<!-- 获取标准答案把分数整理起来 -->
+	<select id="getModelAnswer" resultMap="testMap">
+		select * from random_test where user=#{user} and subject=#{subject} 
+	</select>
+	<!-- 把选择题成绩录入成绩单 -->
+	<insert id="insertGrade" >
+		insert into grade_test values (#{studentGrade.user},#{studentGrade.subject},#{studentGrade.selectgrade},-1,#{studentGrade.selectgrade})
+	
+	</insert>
+	<!-- 把学生的试卷放到学生个人的试卷库中 -->
+	<insert id="insertStudentTest" >
+		insert into sumit_test values (#{studentTest.user},#{studentTest.subject},#{studentTest.t1},#{studentTest.t2},#{studentTest.t3},#{studentTest.t4},
+		#{studentTest.t5},#{studentTest.t6},#{studentTest.t7},#{studentTest.t8},#{studentTest.t9},#{studentTest.t10},#{studentTest.t11},#{studentTest.t12},
+		#{studentTest.t13},#{studentTest.t14},#{studentTest.t15},#{studentTest.t16})
+	</insert>
+	<!-- 考试时间已过的 -->
+	<select id="countPassedTotal" parameterType="String"  resultType="int">
+		select count(*) from arrange where user=#{user} and deadline &lt; now() and  state="0" 
+	</select>
+	<select id="listPassedExamArrange"  resultType="com.user.pojo.ExamArrange">
+		select * from arrange where user=#{page.user} and deadline &lt; now() and  state="0" limit #{page.begin},#{page.end}
+	</select>
+	<!-- 所有成绩查询 -->
+	<select id="countAllGradeTotal" parameterType="String"  resultType="int">
+		select count(*) from grade_test  where user=#{user}
+	</select>
+	<select id="listAllGrade"  resultType="com.user.pojo.StudentGrade">
+		select * from grade_test where user=#{page.user} limit #{page.begin},#{page.end}
+	</select>
+	<!-- 按搜索条件的查询 -->
+	<select id="countSearchGradeTotal" parameterType="String"  resultType="int">
+		select count(*) from grade_test  where user=#{user} and subject=#{content}
+	</select>
+	<select id="listSearchGrade" resultType="com.user.pojo.StudentGrade">
+		select * from grade_test where user=#{page.user} and subject=#{page.content} limit #{page.begin},#{page.end}
+	</select>
+	<!-- 不及格成绩 -->
+	<select id="countFailGradeTotal" parameterType="String"  resultType="int">
+		select count(*) from grade_test  where user=#{user} and shortgrade &gt;= 0 and sumgrade &lt; 60
+	</select>
+	<select id="listFailGrade" resultType="com.user.pojo.StudentGrade">
+		select * from grade_test where user=#{page.user}  and shortgrade &gt;= 0 and sumgrade &lt; 60 limit #{page.begin},#{page.end}
+	</select>
+	<!-- 几个成绩 -->
+	<select id="countPassGradeTotal" parameterType="String"  resultType="int">
+		select count(*) from grade_test  where user=#{user} and shortgrade &gt;= 0 and sumgrade &gt;= 60
+	</select>
+	<select id="listPassGrade" resultType="com.user.pojo.StudentGrade">
+		select * from grade_test where user=#{page.user} and shortgrade &gt;= 0 and sumgrade &gt;= 60 limit #{page.begin},#{page.end}
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</mapper>

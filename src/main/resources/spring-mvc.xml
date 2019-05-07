@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml-body>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+						http://www.springframework.org/schema/beans/spring-beans.xsd
+						http://www.springframework.org/schema/context 
+						http://www.springframework.org/schema/context/spring-context.xsd
+						http://www.springframework.org/schema/mvc
+						http://www.springframework.org/schema/mvc/spring-mvc.xsd
+						http://www.springframework.org/schema/tx 
+						http://www.springframework.org/schema/tx/spring-tx.xsd">
+	<!-- 批量扫描这个包 -->
+	<context:component-scan base-package="com.login.controller
+										  com.user.controller"></context:component-scan>
+	
+	
+	<!-- 注解的适配器 -->
+	<mvc:annotation-driven></mvc:annotation-driven>
+	<!--配置json字符集编码格式-->
+	<mvc:annotation-driven>
+   		<mvc:message-converters>
+   			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
+   				<property name="supportedMediaTypes">
+   					<list>
+   						<value>application/json;charset=UTF-8</value>
+   					</list>
+   				</property>
+   			</bean>
+   			<bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+   				<property name="supportedMediaTypes">
+   					<list>
+   						<value>text/html;charset=UTF-8</value>
+   						<value>application/json</value>
+   					</list>
+   				</property>
+   				<property name="features">
+   					<list>
+   						<value>WriteDateUseDateFormat</value>
+   					</list>
+   				</property>
+   			</bean>
+   		</mvc:message-converters>
+   	</mvc:annotation-driven>
+
+	
+	<!-- 和下面的数据类型转工厂一致 --><!-- 校验器 -->
+<!-- 	<mvc:annotation-driven validator="validator" conversion-service="conversionService"></mvc:annotation-driven> -->
+	
+	
+	<!-- 配置一个视图解析器 -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	<property name="prefix" value="/WEB-INF/"></property>
+		<property name="suffix" value=".jsp"></property>
+	</bean>
+	
+
+	<!-- 配置SpringMVC框架的数据类型转换工厂管理Bean -->
+<!-- 	<bean id ="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+		<property name="converters">
+			<list>
+				<bean class=""></bean>
+			</list>
+		</property>
+	
+	</bean>
+ -->
+	<!-- 配置SpringMVC框架对multipart属性类型的解析器:图片上传组件 -->
+	<bean id="multipartResolver"
+				class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="5242880"></property>
+		<property name="defaultEncoding" value="UTF-8"/>
+	</bean>
+
+	<!-- 配置SpringMVC的校验器 -->
+<!--   	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+		<property name="providerClass" value="org.hibernate.validator.HibernateValidator"></property>
+		<property name="validationMessageSource" ref="messageResource"></property>
+	</bean>
+
+ -->	
+	
+	<!-- 配置错误消息bean，加载执行错误消息属性文件 -->
+<!--	<bean id="messageResource">
+		<property name="basenames">
+			<list>
+				<value>classpath:errorMessage</value>
+				
+			</list>
+			
+		</property>
+		<property name="fileEncodings" value="UTF-8"></property>
+		<property name="cacheSeconds" value="120"></property>
+			
+	</bean>
+ -->	
+	
+
+	<bean class="com.ecxeption.HandlerException"></bean>
+	
+	<!-- 配置静态资源的过滤 当使用restful风格时，需要配置上静态资源，要不就过滤掉了， **是当下面还有个文件时就要这样写-->
+	
+   
+	<mvc:resources location="/bootstrap-3.3.7-dist/" mapping="/bootstrap-3.3.7-dist/**"></mvc:resources>
+	<mvc:resources location="/uploadimage/" mapping="/uploadimage/**"></mvc:resources>
+	
+	<!-- 配置拦截器执行Bean -->
+	<bean id="interceptor" class="com.interceptor.HandlerInterceptor1"></bean>
+	
+	<!-- 配置拦截器 拦截所有的-->
+	<mvc:interceptors>
+		<mvc:interceptor>
+		<!-- path属性中的/**表示所有的url，包括url，*表示只拦截最根层，子层不拦截 -->
+			<mvc:mapping path="/**"/>
+			<ref bean="interceptor"/>
+		</mvc:interceptor>
+	</mvc:interceptors>
+	
+</beans>
+</xml-body>
